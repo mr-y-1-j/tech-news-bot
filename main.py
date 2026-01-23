@@ -49,7 +49,7 @@ def main():
         message = f"**🔥 Tech News Pickup**\n{summary}\nOriginal: {story.get('url')}\n------------------------"
         requests.post(DISCORD_WEBHOOK_URL, json={"content": message})
         print("Waiting 15 seconds...")
-        time.sleep(15) # 429エラー回避
+        time.sleep(30) # 429エラー回避
 
 if __name__ == "__main__":
     main()
