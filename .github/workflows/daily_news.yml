@@ -26,3 +26,9 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python main.py
+      - name: Run bot
+        env:
+          DISCORD_WEBHOOK_URL_TECH: ${{ secrets.DISCORD_WEBHOOK_URL_TECH }}
+          DISCORD_WEBHOOK_URL_STOCK: ${{ secrets.DISCORD_WEBHOOK_URL_STOCK }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python main.py
