@@ -1,82 +1,93 @@
 import os
 import requests
-import google.generativeai as genai
+from google import genai
 import time
 
-# 設定
-DISCORD_WEBHOOK_URL = os.environ["DISCORD_WEBHOOK_URL"]
-GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
-HN_TOP_STORIES_URL = "https://hacker-news.firebaseio.com/v0/topstories.json"
-HN_ITEM_URL = "https://hacker-news.firebaseio.com/v0/item/{}.json"
+# 設定の読み込み
+DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
-# Geminiの設定
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-2.0-flash")
+# 起動チェック
+if not DISCORD_WEBHOOK_URL.startswith("http"):
+    raise ValueError("Error: DISCORD_WEBHOOK_URL が正しく設定されていません。GitHubのSecretsを確認してください。")
 
-def get_top_stories(limit=5):
-    """Hacker Newsのトップ記事IDを取得"""
-    try:
-        response = requests.get(HN_TOP_STORIES_URL)
-        return response.json()[:limit]
-    except Exception as e:
-        print(f"Error fetching top stories: {e}")
-        return []
+# Geminiの初期化
+client = genai.Client(api_key=GEMINI_API_KEY)
 
-def get_story_details(story_id):
-    """記事の詳細データを取得"""
-    try:
-        response = requests.get(HN_ITEM_URL.format(story_id))
-        return response.json()
-    except Exception as e:
-        print(f"Error fetching details for {story_id}: {e}")
-        return None
+def get_viral_stories(min_score=100, max_count=5):
+    """
+    Hacker Newsのトップ記事から、指定スコア以上のものを最大max_count件取得
+    """
+    print(f"Searching for stories with score > {min_score}...")
+    top_ids_url = "https://hacker-news.firebaseio.com/v0/topstories.json"
+    item_url = "https://hacker-news.firebaseio.com/v0/item/{}.json"
+    
+    top_ids = requests.get(top_ids_url).json()
+    viral_stories = []
+    
+    # 上位から順にチェックし、条件に合うものを探す
+    for story_id in top_ids:
+        if len(viral_stories) >= max_count:
+            break
+            
+        story = requests.get(item_url.format(story_id)).json()
+        score = story.get("score", 0)
+        
+        if score >= min_score and "url" in story:
+            print(f"Found: [{score}pts] {story.get('title')}")
+            viral_stories.append(story)
+            
+    return viral_stories
 
-def summarize_article(title, url):
+def summarize_article(title, url, score):
     """Geminiで要約を作成"""
     prompt = f"""
-    あなたは優秀なテックリサーチャーです。以下のHacker Newsの記事タイトルから、内容を推測し、
-    日本の多忙なエンジニア向けに要約してください。
-
+    以下のテックニュースを日本語で要約してください。
+    
     タイトル: {title}
     URL: {url}
+    HackerNewsスコア: {score}
 
     【出力形式】
-    1行目: 日本語のキャッチーな見出し (バズり度予測: S/A/B)
-    2行目: どんな技術/ニュースなのか（簡潔に）
-    3行目: 私たちにどんな影響があるか（推測でOK）
+    1行目: 日本語の見出し (スコア:{score}点)
+    2行目: ニュースの核心を1行で
+    3行目: 技術的背景や将来的な影響を1行で
     """
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-2.0-flash", 
+            contents=prompt
+        )
         return response.text
     except Exception as e:
-        return f"要約エラー: {e}"
-
-def send_discord(content):
-    """Discordに送信"""
-    data = {"content": content}
-    requests.post(DISCORD_WEBHOOK_URL, json=data)
+        return f"要約エラー (429回避中...): {e}"
 
 def main():
-    print("Starting Tech News Bot...")
-    story_ids = get_top_stories(limit=5) # トップ5件を取得
+    print("Starting Tech News Bot (Viral Filter Mode)...")
     
-    for story_id in story_ids:
-        story = get_story_details(story_id)
-        if not story or "url" not in story:
-            continue
-            
-        # 記事情報をコンソール出力（ログ用）
-        print(f"Processing: {story.get('title')}")
+    # 100ポイント以上の記事を最大5件取得
+    stories = get_viral_stories(min_score=100, max_count=5)
+    
+    if not stories:
+        print("No viral stories found at this time.")
+        return
+
+    for story in stories:
+        title = story.get('title')
+        url = story.get('url')
+        score = story.get('score')
         
-        # 要約生成
-        summary = summarize_article(story.get('title'), story.get('url'))
+        print(f"Summarizing: {title}")
+        summary = summarize_article(title, url, score)
         
-        # Discordへのメッセージ作成
-        message = f"**Hacker News Pickup** 🚀\n{summary}\nOriginal: {story.get('url')}\n------------------------"
+        message = f"**🔥 Tech News Pickup (100+ pts)**\n{summary}\nOriginal: {url}\n------------------------"
         
-        # 送信
-        send_discord(message)
-        time.sleep(2) # 連投制限回避
+        # Discord送信
+        requests.post(DISCORD_WEBHOOK_URL, json={"content": message})
+        
+        # 無料枠制限(429)を確実に回避するため、15秒待機
+        print("Waiting 15 seconds for rate limit safety...")
+        time.sleep(15)
 
 if __name__ == "__main__":
     main()
