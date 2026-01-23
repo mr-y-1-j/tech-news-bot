@@ -15,12 +15,12 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.11'
 
       - name: Install libraries
-        # ここを修正：古いgoogleライブラリを消してから、新しくインストールし直します
         run: |
-          pip uninstall -y google-generativeai google-api-core
+          pip install --upgrade pip
+          pip uninstall -y google google-cloud-core google-api-core
           pip install -r requirements.txt
 
       - name: Run bot
