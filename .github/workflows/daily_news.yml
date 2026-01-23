@@ -1,24 +1,27 @@
 name: Daily Tech News
 
 on:
-  workflow_dispatch: # 手動実行ボタン
+  workflow_dispatch:
   schedule:
-    - cron: '0 22 * * *' # 日本時間 朝7:00 (UTC 22:00)
+    - cron: '0 22 * * *'
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.12'
 
       - name: Install libraries
-        run: pip install -r requirements.txt
+        # ここを修正：古いgoogleライブラリを消してから、新しくインストールし直します
+        run: |
+          pip uninstall -y google-generativeai google-api-core
+          pip install -r requirements.txt
 
       - name: Run bot
         env:
