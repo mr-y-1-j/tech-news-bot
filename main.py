@@ -13,7 +13,7 @@ if not DISCORD_WEBHOOK_URL.startswith("http"):
 
 # Geminiの初期化 (旧SDK形式)
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-2.0-flash")
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 def get_viral_stories(min_score=100, max_count=5):
     print(f"Searching for stories with score > {min_score}...")
