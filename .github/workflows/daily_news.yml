@@ -26,9 +26,8 @@ jobs:
       
       - name: Run bot
         env:
-          # Pythonコードが探している名前 : GitHub Secrets（金庫）の名前
-          DISCORD_WEBHOOK_URL_TECH: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          DISCORD_WEBHOOK_URL_STOCK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          # 【重要】Secretsの名前が GOOGLE_API_KEY なら下記を変更してください
-          GEMINI_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          # 左側：Pythonが使う名前 / 右側：GitHubのSecret名
+          DISCORD_WEBHOOK_URL_TECH: ${{ secrets.DISCORD_WEBHOOK_URL_TECH }}
+          DISCORD_WEBHOOK_URL_STOCK: ${{ secrets.DISCORD_WEBHOOK_URL_STOCK }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python main.py
