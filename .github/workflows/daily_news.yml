@@ -12,25 +12,23 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      
       - name: Install libraries
         run: |
           pip install --upgrade pip
           pip uninstall -y google google-cloud-core google-api-core
           pip install -r requirements.txt
+      
       - name: Run bot
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Pythonコードが探している名前 : GitHub Secrets（金庫）の名前
+          DISCORD_WEBHOOK_URL_TECH: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_URL_STOCK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          # 【重要】Secretsの名前が GOOGLE_API_KEY なら下記を変更してください
+          GEMINI_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: python main.py
-      - name: Run bot
-- name: Run python script
-      env:
-        # Pythonコードが探している名前 : GitHub Secrets（金庫）の名前
-        DISCORD_WEBHOOK_URL_TECH: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        DISCORD_WEBHOOK_URL_STOCK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        GEMINI_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-      run: python main.py
