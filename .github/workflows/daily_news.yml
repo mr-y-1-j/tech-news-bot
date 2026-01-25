@@ -27,8 +27,8 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: python main.py
       - name: Run bot
-        env:
-          DISCORD_WEBHOOK_URL_TECH: ${{ secrets.DISCORD_WEBHOOK_URL_TECH }}
-          DISCORD_WEBHOOK_URL_STOCK: ${{ secrets.DISCORD_WEBHOOK_URL_STOCK }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python main.py
+env:
+      # Pythonコード内の変数名 : GitHub Secretsの名前
+      DISCORD_WEBHOOK_URL_TECH: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      DISCORD_WEBHOOK_URL_STOCK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      GEMINI_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
