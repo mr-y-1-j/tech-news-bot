@@ -1,0 +1,35 @@
+name: Morning Briefing
+
+# トリガー：日本時間の朝7時（UTC 22:00）
+on:
+  schedule:
+    - cron: '0 22 * * *'
+  # 手動でも実行できるようにする
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    # タイムゾーンを日本に設定（ログが見やすくなります）
+    env:
+      TZ: 'Asia/Tokyo'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Morning Script
+        env:
+          # リポジトリのSettings > Secretsで設定したURLを読み込む
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python morning.py
