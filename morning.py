@@ -162,18 +162,16 @@ def send_to_discord(title, color, alert_msg, metrics_text, hit_watch_words, tren
         }]
     }
 
-    # 送信実行
-    if "https://discord.com/api/webhooks/1464073186953138389/y52-OgdBXQC8cX_tktFRPtqMxmVD9vYUhzzITlPprQQy9xhjyWws5CwP5sd2IkH7vpbE" in DISCORD_WEBHOOK_URL:
-        print("\n[Test Mode] Webhook URLが設定されていません。出力内容を表示します:\n")
-        print(f"Title: {title}")
-        print(description)
+# 送信実行
+    print("Sending to Discord...")
+    response = requests.post(DISCORD_WEBHOOK_URL, json=payload)
+    
+    if response.status_code == 204:
+        print("Successfully sent to Discord.")
     else:
-        response = requests.post(DISCORD_WEBHOOK_URL, json=payload)
-        if response.status_code == 204:
-            print("Successfully sent to Discord.")
-        else:
-            print(f"Failed to send: {response.status_code}")
-
+        print(f"Failed to send: {response.status_code}")
+        print(response.text) # エラー時の詳細を表示
+        
 def main():
     # 市場分析
     title, color, alert, metrics = analyze_market_health()
