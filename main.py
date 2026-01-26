@@ -9,7 +9,7 @@ WEBHOOK_STOCK = os.environ.get("DISCORD_WEBHOOK_URL_STOCK", "")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 # 設定: 確実に存在するモデル名を使用
-MODEL_NAME = "gemini-2.0-flash"
+MODEL_NAME = "gemini-flash-latest"
 
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel(MODEL_NAME)
