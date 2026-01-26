@@ -21,8 +21,8 @@ jobs:
       - name: Install libraries
         run: |
           pip install --upgrade pip
-          pip uninstall -y google google-cloud-core google-api-core
-          pip install -r requirements.txt
+          pip install -U requests
+          pip install -U google-generativeai
       
       - name: Run bot
         env:
