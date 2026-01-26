@@ -15,7 +15,7 @@ else:
     print(f"GEMINI_API_KEY loaded (Length: {len(GEMINI_API_KEY)})")
 
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-pro")
 
 def get_hacker_news(min_score=100, limit=3):
     print("Fetching Hacker News...")
